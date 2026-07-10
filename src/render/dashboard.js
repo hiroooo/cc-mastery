@@ -74,7 +74,7 @@ function heatmap(dayCounts, lang, t) {
       <div class="hm-wrap">
         <div class="hm-dow"><span>${dow[0]}</span><span>${dow[1]}</span><span>${dow[2]}</span></div>
         <div class="hm-scroll">
-          <div class="hm-months" style="grid-template-columns: repeat(${colIndex}, 18px)">${monthLabels.join('')}</div>
+          <div class="hm-months" style="grid-template-columns: repeat(${colIndex}, 20px)">${monthLabels.join('')}</div>
           <div class="hm-grid">${cols.join('')}</div>
         </div>
       </div>

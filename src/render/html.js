@@ -18,7 +18,7 @@ const CSS = `
   --series: #3987e5;
   --series-bright: #4da3ff;
   --gold: #e8b64c;
-  --cell-empty: rgba(255,255,255,0.055);
+  --cell-empty: rgba(255,255,255,0.07);
   --sp-2: 8px; --sp-3: 12px; --sp-4: 16px; --sp-6: 24px; --sp-8: 32px; --sp-12: 48px;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -103,15 +103,15 @@ td.strong { color: var(--ink); font-weight: 700; white-space: nowrap; }
 /* ---- heatmap ---- */
 .hm-wrap { display: flex; gap: 8px; justify-content: center; }
 .hm-dow {
-  display: flex; flex-direction: column; gap: 20px;
-  padding-top: 39px; font-size: 11px; line-height: 16px; color: var(--muted); flex: none;
+  display: flex; flex-direction: column; gap: 24px;
+  padding-top: 41px; font-size: 11px; line-height: 16px; color: var(--muted); flex: none;
 }
 .hm-scroll { overflow-x: auto; padding-bottom: 4px; }
 .hm-months { display: grid; gap: 3px; font-size: 11px; color: var(--muted); height: 18px; margin-bottom: 3px; }
 .hm-months span { white-space: nowrap; }
 .hm-grid { display: flex; gap: 3px; }
 .hm-col { display: flex; flex-direction: column; gap: 3px; }
-.hm-cell { width: 15px; height: 15px; border-radius: 3px; background: var(--cell-empty); }
+.hm-cell { width: 17px; height: 17px; border-radius: 3px; background: var(--cell-empty); }
 .hm-legend { display: flex; align-items: center; gap: 4px; justify-content: flex-end; margin-top: 12px; font-size: 11px; color: var(--muted); }
 .hm-legend i { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
 

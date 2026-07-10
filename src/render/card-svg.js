@@ -79,7 +79,7 @@ function radar(axes, lang, cx, cy, R) {
     const yL = isTop ? y - 26 : isBottom ? y + 10 : y - 8;
     const label = lang === 'ja' ? axes[i].ja : axes[i].en;
     out += `<text x="${x.toFixed(1)}" y="${yL.toFixed(1)}" text-anchor="middle" font-size="21" font-weight="700" fill="${C.label}">${esc(label)}</text>`;
-    out += `<text x="${x.toFixed(1)}" y="${(yL + 28).toFixed(1)}" text-anchor="middle" font-size="26" font-weight="800" fill="${C.ink}" style="font-variant-numeric:tabular-nums">${Math.round(axes[i].score)}</text>`;
+    out += `<text x="${x.toFixed(1)}" y="${(yL + 33).toFixed(1)}" text-anchor="middle" font-size="26" font-weight="800" fill="${C.ink}" style="font-variant-numeric:tabular-nums">${Math.round(axes[i].score)}</text>`;
   }
   return out;
 }
@@ -93,13 +93,13 @@ function statBand(stats, x, y, w, h) {
     if (i > 0) {
       out += `<line x1="${(x + step * i).toFixed(1)}" y1="${y + 14}" x2="${(x + step * i).toFixed(1)}" y2="${y + h - 14}" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>`;
     }
-    out += `<text x="${cxCell}" y="${y + 42}" text-anchor="middle" font-size="27" font-weight="800" fill="${C.ink}" style="font-variant-numeric:tabular-nums">${esc(fmt(s.value))}</text>`;
+    out += `<text x="${cxCell}" y="${y + 40}" text-anchor="middle" font-size="27" font-weight="800" fill="${C.ink}" style="font-variant-numeric:tabular-nums">${esc(fmt(s.value))}</text>`;
     // icon + label centered as a pair: icon sits left of the label text
     const labelLen = String(s.label).length;
     const approxW = labelLen * 13; // CJK-ish estimate, good enough to center
     const pairLeft = cxCell - (approxW + 20) / 2;
-    out += svgIcon(STAT_ICONS[i] ?? 'zap', pairLeft, y + 56, 14, C.muted, 2.4);
-    out += `<text x="${pairLeft + 20}" y="${y + 67}" font-size="13" fill="${C.muted}">${esc(s.label)}</text>`;
+    out += svgIcon(STAT_ICONS[i] ?? 'zap', pairLeft, y + 52, 14, C.muted, 2.4);
+    out += `<text x="${pairLeft + 20}" y="${y + 63}" font-size="13" fill="${C.muted}">${esc(s.label)}</text>`;
   });
   return out;
 }
@@ -182,11 +182,11 @@ export function renderCardSvg(data) {
     ${radar(score.axes, lang, cx, cy, R)}
 
     <!-- stat band -->
-    ${statBand(stats, 64, 552, W - 128, 84)}
+    ${statBand(stats, 64, 544, W - 128, 80)}
 
-    <!-- footer -->
-    <text x="64" y="661" font-size="13" fill="${C.muted}">${esc(t('estimated'))}</text>
-    <text x="${W - 64}" y="661" font-size="15" font-weight="700" text-anchor="end" fill="${C.goldDim}">npx cc-mastery</text>
+    <!-- footer (≥32px clear of the card edge for X-preview crops) -->
+    <text x="64" y="641" font-size="13" fill="${C.muted}">${esc(t('estimated'))}</text>
+    <text x="${W - 64}" y="641" font-size="15" font-weight="700" text-anchor="end" fill="${C.goldDim}">npx cc-mastery</text>
   </g>
 </svg>`;
 }
