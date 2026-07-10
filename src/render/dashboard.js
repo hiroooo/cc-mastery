@@ -3,6 +3,8 @@
  * project / model names, behind an explicit "don't screenshot this" banner).
  */
 import { icon } from './icons.js';
+import { BASELINE, LEVEL_GAMMA } from '../scorer.js';
+import { RARITY_TIERS } from '../rarity.js';
 
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
@@ -133,11 +135,69 @@ function top(obj, n) {
     .slice(0, n);
 }
 
+/** The "how scoring works" panel — formulas laid out explicitly. */
+function scoringMethod(lang, t) {
+  const step = (title, body, formula) => `<div class="score-step">
+    <h4>${esc(lang === 'ja' ? title.ja : title.en)}</h4>
+    ${formula ? `<div class="formula">${formula}</div>` : ''}
+    <p>${esc(lang === 'ja' ? body.ja : body.en)}</p>
+  </div>`;
+
+  const rarityRows = RARITY_TIERS.map((r, i) => {
+    // RARITY_TIERS is ordered high→low; the next higher tier sits at i-1.
+    const hi = i === 0 ? 99 : RARITY_TIERS[i - 1].minLevel - 1;
+    const range = r.minLevel === 0 ? `1–${hi}` : `${r.minLevel}–${hi}`;
+    return `<tr>
+      <td><b class="tier">${esc(r.id)}</b> <span class="dim">${esc(lang === 'ja' ? r.ja : r.en)}</span></td>
+      <td class="stars">${'★'.repeat(r.stars)}<span class="dim">${'★'.repeat(5 - r.stars)}</span></td>
+      <td class="num">Lv ${range}</td>
+    </tr>`;
+  }).join('');
+
+  return `<section>
+    <h2>${icon('gauge', 15)}<span>${esc(t('scoringHeading'))}</span></h2>
+    <div class="panel score-panel">
+      <p class="score-intro">${esc(t('scoringIntro'))}</p>
+      <div class="score-grid">
+        ${step(
+          { ja: t('scoringSatTitle'), en: t('scoringSatTitle') },
+          { ja: t('scoringSatBody'), en: t('scoringSatBody') },
+          `points = 100 · <span class="v">x</span> / (<span class="v">x</span> + <span class="v">h</span>)`
+        )}
+        ${step(
+          { ja: t('scoringAxisTitle'), en: t('scoringAxisTitle') },
+          { ja: t('scoringAxisBody'), en: t('scoringAxisBody') },
+          `axis = Σ ( <span class="v">wᵢ</span> · pointsᵢ )`
+        )}
+        ${step(
+          { ja: t('scoringLevelTitle'), en: t('scoringLevelTitle') },
+          { ja: t('scoringLevelBody'), en: t('scoringLevelBody') },
+          `Lv = round( 99 · (S/100)<sup>${LEVEL_GAMMA}</sup> )`
+        )}
+        ${step(
+          { ja: t('scoringDevTitle'), en: t('scoringDevTitle') },
+          { ja: t('scoringDevBody'), en: t('scoringDevBody') },
+          `dev = 50 + 10 · (S − ${BASELINE.mean}) / ${BASELINE.sd}`
+        )}
+      </div>
+      <div class="rarity-block">
+        <h4>${esc(t('scoringRarityTitle'))}</h4>
+        <p>${esc(t('scoringRarityBody'))}</p>
+        <table class="rarity-table">
+          <thead><tr><th>${esc(t('colTier'))}</th><th>${esc(t('colStars'))}</th><th class="num">${esc(t('colLevelRange'))}</th></tr></thead>
+          <tbody>${rarityRows}</tbody>
+        </table>
+      </div>
+    </div>
+  </section>`;
+}
+
 /** data = { score, sessions, lang, t } */
 export function renderDashboard(data) {
   const { score, sessions, lang, t } = data;
   return `
   <div class="privacy-banner">${icon('shield', 15)}<span>${esc(t('privacyBanner'))}</span></div>
+  ${scoringMethod(lang, t)}
   ${breakdownTables(score, lang, t)}
   ${heatmap(sessions.dayCounts ?? {}, lang, t)}
   ${barList(top(sessions.toolUse ?? {}, 15), t('toolsHeading'), 'wrench')}

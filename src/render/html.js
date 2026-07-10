@@ -37,10 +37,29 @@ body {
 
 /* ---- card zone ---- */
 .card-holder { text-align: center; }
-.card-holder svg {
-  max-width: 100%; height: auto; border-radius: 14px;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04);
+.card-frame {
+  position: relative; display: inline-block; max-width: 100%;
+  border-radius: 16px; overflow: hidden;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(244,210,122,0.14), 0 0 44px rgba(244,210,122,0.10);
 }
+.card-frame svg { display: block; max-width: 100%; height: auto; }
+/* live holographic shimmer — sweeps across the card; NOT baked into the PNG
+   export (that serializes only the inner <svg>). Pure eye-candy for viewing. */
+.card-frame::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%,
+    rgba(255,77,109,0.14), rgba(255,227,77,0.12), rgba(77,255,163,0.12),
+    rgba(67,217,255,0.14), rgba(200,107,255,0.14), transparent 70%);
+  background-size: 260% 260%;
+  mix-blend-mode: color-dodge;
+  animation: holo-sweep 7s ease-in-out infinite;
+}
+@keyframes holo-sweep {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@media (prefers-reduced-motion: reduce) { .card-frame::before { animation: none; } }
 .card-actions { margin: var(--sp-6) 0 var(--sp-3); }
 button.save-png {
   display: inline-flex; align-items: center; gap: 8px;
@@ -74,6 +93,36 @@ h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg
   background: linear-gradient(180deg, var(--surface-2), var(--surface));
   border: 1px solid var(--hairline); border-radius: 14px; padding: var(--sp-6);
 }
+
+/* ---- scoring method ---- */
+.score-panel { padding: var(--sp-6); }
+.score-intro { color: var(--ink-2); font-size: 14px; margin-bottom: var(--sp-6); max-width: 78ch; }
+.score-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: var(--sp-4); }
+.score-step {
+  background: rgba(255,255,255,0.025); border: 1px solid var(--hairline);
+  border-radius: 12px; padding: var(--sp-4);
+}
+.score-step h4 { font-size: 13.5px; color: var(--ink); margin-bottom: 10px; font-weight: 700; }
+.formula {
+  font-family: 'SFMono-Regular', ui-monospace, 'Cascadia Code', Menlo, monospace;
+  font-size: 15px; color: var(--gold); background: rgba(232,182,76,0.06);
+  border: 1px solid rgba(232,182,76,0.18); border-radius: 8px;
+  padding: 10px 12px; margin-bottom: 10px; overflow-x: auto;
+}
+.formula .v { color: var(--series-bright); font-style: italic; }
+.formula sup { font-size: 0.7em; }
+.score-step p { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+.rarity-block { margin-top: var(--sp-6); padding-top: var(--sp-6); border-top: 1px solid var(--hairline); }
+.rarity-block h4 { font-size: 13.5px; color: var(--ink); margin-bottom: 8px; }
+.rarity-block > p { font-size: 12.5px; color: var(--muted); margin-bottom: var(--sp-4); max-width: 78ch; }
+.rarity-table { width: 100%; max-width: 460px; border-collapse: collapse; font-size: 13.5px; }
+.rarity-table th { color: var(--muted); font-weight: 600; text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--hairline); font-size: 11.5px; letter-spacing: 0.6px; }
+.rarity-table td { padding: 7px 8px; border-bottom: 1px solid rgba(255,255,255,0.045); }
+.rarity-table tbody tr:last-child td { border-bottom: 0; }
+.rarity-table .tier { color: var(--gold); font-weight: 800; letter-spacing: 0.5px; }
+.rarity-table .stars { color: var(--gold); letter-spacing: 2px; }
+.rarity-table .dim { color: rgba(255,255,255,0.22); }
+.rarity-table td.num { text-align: right; color: var(--ink-2); font-variant-numeric: tabular-nums; }
 
 /* ---- axis breakdown ---- */
 .axis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: var(--sp-4); }
@@ -176,7 +225,7 @@ export function renderHtml(data) {
 <body>
 <div class="wrap">
   <div class="card-holder">
-    ${card}
+    <div class="card-frame">${card}</div>
     <div class="card-actions">
       <button class="save-png" id="save-png">${icon('download', 16)}${esc(t('savePng'))}</button>
     </div>

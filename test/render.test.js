@@ -79,6 +79,9 @@ test('renderHtml is a full document with card + dashboard + PNG button', () => {
   assert.ok(html.includes('id="card-svg"'));
   assert.ok(html.includes('id="save-png"'));
   assert.ok(html.includes('toDataURL'), 'PNG export script present');
+  // scoring method is documented with the actual formulas
+  assert.ok(html.includes('100 &#183; ') || html.includes('100 · '), 'sat formula shown');
+  assert.ok(html.includes('(S/100)'), 'level formula shown');
   // dashboard (local-only section) DOES show names, behind the privacy banner
   assert.ok(html.includes('my-secret-skill'));
   const bannerIdx = html.indexOf('privacy-banner');

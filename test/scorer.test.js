@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { sat, computeScores, AXES, BASELINE } from '../src/scorer.js';
+import { resolveRarity, RARITY_TIERS } from '../src/rarity.js';
 
 test('sat() boundaries', () => {
   assert.equal(sat(0, 10), 0);
@@ -93,6 +94,29 @@ test('beginner raw does not flatline at zero', () => {
   const s = computeScores(raw);
   assert.ok(s.total > 3, `total ${s.total}`);
   assert.ok(s.level >= 5, `level ${s.level} should feel non-humiliating`);
+});
+
+test('rarity maps level to a tier + star count', () => {
+  assert.equal(resolveRarity(80).id, 'SSR');
+  assert.equal(resolveRarity(80).stars, 5);
+  assert.equal(resolveRarity(60).id, 'SR');
+  assert.equal(resolveRarity(40).id, 'R');
+  assert.equal(resolveRarity(20).id, 'UC');
+  assert.equal(resolveRarity(5).id, 'N');
+  assert.equal(resolveRarity(1).stars, 1);
+  // tiers monotonic in stars and covering the full level range
+  for (let i = 1; i < RARITY_TIERS.length; i += 1) {
+    assert.ok(RARITY_TIERS[i - 1].stars > RARITY_TIERS[i].stars);
+  }
+  assert.equal(RARITY_TIERS[RARITY_TIERS.length - 1].minLevel, 0);
+});
+
+test('computeScores attaches a rarity to the result', () => {
+  const raw = emptyRaw();
+  raw.fs.skills = 80;
+  const s = computeScores(raw);
+  assert.ok(s.rarity && typeof s.rarity.id === 'string');
+  assert.equal(s.rarity.id, resolveRarity(s.level).id);
 });
 
 test('breakdown is exposed for every metric (dashboard contract)', () => {

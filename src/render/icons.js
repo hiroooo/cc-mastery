@@ -37,6 +37,16 @@ const PATHS = {
   swords: '<path d="M4 4l10.5 10.5M20 4L9.5 14.5M4 20l4-4M20 20l-4-4M6.5 17.5l-2 2M17.5 17.5l2 2"/>',
 };
 
+// Filled 5-point star as an SVG path on a 24×24 box (for card rarity + inline use).
+export const STAR_PATH =
+  'M12 2.4l2.83 5.9 6.47.86-4.75 4.48 1.2 6.42L12 17.9l-5.75 3.16 1.2-6.42L2.7 9.16l6.47-.86z';
+
+/** Star glyph <path>, filled or outline, at (x,y) scaled to `size`. */
+export function svgStar(x, y, size, fill, stroke) {
+  const s = size / 24;
+  return `<path d="${STAR_PATH}" transform="translate(${x},${y}) scale(${s})" fill="${fill}" stroke="${stroke}" stroke-width="1" stroke-linejoin="round"/>`;
+}
+
 /** Inline SVG icon. size in px, colored via currentColor. */
 export function icon(name, size = 18, extraAttrs = '') {
   const body = PATHS[name];

@@ -1,30 +1,29 @@
 /**
- * Share card: 1200×675 (16:9, X-inline friendly) self-contained SVG.
+ * Share card: 1200×675 (16:9) self-contained SVG — a holographic trading-card
+ * treatment of your Claude Code mastery. Gold metallic frame, rainbow foil
+ * sheen (intensity scales with rarity), tier badge + star rating, glowing radar.
  *
- * Privacy contract: the card shows AGGREGATE NUMBERS ONLY. No skill names,
- * no project names, no paths, no model names ever appear here (enforced by
- * test/render.test.js).
+ * Privacy contract: AGGREGATE NUMBERS ONLY. No skill names, project names,
+ * paths, or model ids ever appear here (enforced by test/render.test.js).
  *
- * Composition: framed RPG card — badge header (no full-width rules), left
- * column (level / title / std-score pill), right radar zone with glow, and a
- * bottom stat band. Radar labels own their zone, so nothing can collide.
+ * The card is a static, self-contained SVG so it exports cleanly to PNG. The
+ * live "holo shimmer" (a moving rainbow overlay) is added in html.js with CSS
+ * and deliberately does NOT bake into the PNG.
  */
-import { svgIcon, STAT_ICONS } from './icons.js';
+import { svgIcon, svgStar, STAT_ICONS } from './icons.js';
 
 const W = 1200;
 const H = 675;
 
 const C = {
   ink: '#ffffff',
-  inkSoft: '#cfd8ea',
-  label: '#e8e2d2',
-  muted: '#8b92a8',
-  frame: 'rgba(255,255,255,0.10)',
-  goldFrame: 'rgba(232,182,76,0.28)',
-  grid: 'rgba(255,255,255,0.13)',
-  series: '#4a99f0',
-  gold: '#f0c05a',
-  goldDim: 'rgba(232,182,76,0.85)',
+  inkSoft: '#d3ddf2',
+  label: '#efe7d0',
+  muted: '#9aa0bb',
+  gridLine: 'rgba(255,255,255,0.14)',
+  series: '#57b0ff',
+  gold: '#f4d27a',
+  goldDeep: '#c99a3a',
 };
 
 const FONT = `system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans JP', sans-serif`;
@@ -32,17 +31,13 @@ const FONT = `system-ui, -apple-system, 'Segoe UI', 'Hiragino Sans', 'Noto Sans 
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
 }
-
 function fmt(n) {
   return Number(n).toLocaleString('en-US');
 }
-
-/** Polar → cartesian. angleDeg measured from 12 o'clock, clockwise. */
 function pt(cx, cy, r, angleDeg) {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
   return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
 }
-
 function polygonPoints(cx, cy, r, n, scores = null) {
   const pts = [];
   for (let i = 0; i < n; i += 1) {
@@ -56,21 +51,18 @@ function radar(axes, lang, cx, cy, R) {
   const n = axes.length;
   const scores = axes.map((a) => a.score);
   let out = '';
-
   for (let ring = 1; ring <= 4; ring += 1) {
-    out += `<polygon points="${polygonPoints(cx, cy, (R * ring) / 4, n)}" fill="none" stroke="${C.grid}" stroke-width="1"/>`;
+    out += `<polygon points="${polygonPoints(cx, cy, (R * ring) / 4, n)}" fill="none" stroke="${C.gridLine}" stroke-width="1"/>`;
   }
   for (let i = 0; i < n; i += 1) {
     const [x, y] = pt(cx, cy, R, (360 / n) * i);
-    out += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${C.grid}" stroke-width="1"/>`;
+    out += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="${C.gridLine}" stroke-width="1"/>`;
   }
-  out += `<polygon points="${polygonPoints(cx, cy, R, n, scores)}" fill="url(#radar-fill)" stroke="${C.series}" stroke-width="2.5" stroke-linejoin="round" filter="url(#radar-glow)"/>`;
+  out += `<polygon points="${polygonPoints(cx, cy, R, n, scores)}" fill="url(#radar-fill)" stroke="${C.series}" stroke-width="2.5" stroke-linejoin="round" filter="url(#glow-blue)"/>`;
   for (let i = 0; i < n; i += 1) {
     const [x, y] = pt(cx, cy, (R * scores[i]) / 100, (360 / n) * i);
-    out += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#9cc6f7" stroke="#0d1322" stroke-width="2"/>`;
+    out += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4" fill="#bfe0ff" stroke="#0b1020" stroke-width="2"/>`;
   }
-  // labels: name + score stacked, ALL middle-anchored so long CJK labels
-  // stay inside the card frame; vertical offset varies by zone (top/side/bottom)
   for (let i = 0; i < n; i += 1) {
     const angle = (360 / n) * i;
     const [x, y] = pt(cx, cy, R + 30, angle);
@@ -84,19 +76,44 @@ function radar(axes, lang, cx, cy, R) {
   return out;
 }
 
-/** Bottom stat band: value on top, icon + label underneath, hairline dividers. */
+/** Five-star row; `filled` of them lit gold, the rest dim. */
+function starRow(x, y, size, filled) {
+  let out = '';
+  for (let i = 0; i < 5; i += 1) {
+    const lit = i < filled;
+    out += svgStar(
+      x + i * (size + 4),
+      y,
+      size,
+      lit ? 'url(#gold-grad)' : 'rgba(255,255,255,0.10)',
+      lit ? '#b8860b' : 'rgba(255,255,255,0.18)'
+    );
+  }
+  return out;
+}
+
+/** Rarity plate: [SSR] + stars + tier name. */
+function rarityPlate(rarity, lang, x, y) {
+  const name = lang === 'ja' ? rarity.ja : rarity.en;
+  return `
+    <g filter="url(#glow-gold)">
+      <rect x="${x}" y="${y}" width="86" height="40" rx="9" fill="url(#gold-grad)"/>
+    </g>
+    <text x="${x + 43}" y="${y + 28}" text-anchor="middle" font-size="23" font-weight="900" fill="#2a1e05" letter-spacing="0.5">${esc(rarity.id)}</text>
+    ${starRow(x + 98, y + 9, 21, rarity.stars)}
+    <text x="${x + 98}" y="${y + 38}" font-size="14" font-weight="700" letter-spacing="3" fill="${C.gold}">${esc(name.toUpperCase())}</text>`;
+}
+
 function statBand(stats, x, y, w, h) {
   const step = w / stats.length;
-  let out = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="14" fill="rgba(255,255,255,0.035)" stroke="${C.frame}" stroke-width="1"/>`;
+  let out = `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="13" fill="rgba(6,10,22,0.55)" stroke="rgba(244,210,122,0.22)" stroke-width="1"/>`;
   stats.forEach((s, i) => {
     const cxCell = x + step * i + step / 2;
     if (i > 0) {
-      out += `<line x1="${(x + step * i).toFixed(1)}" y1="${y + 14}" x2="${(x + step * i).toFixed(1)}" y2="${y + h - 14}" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>`;
+      out += `<line x1="${(x + step * i).toFixed(1)}" y1="${y + 14}" x2="${(x + step * i).toFixed(1)}" y2="${y + h - 14}" stroke="rgba(244,210,122,0.16)" stroke-width="1"/>`;
     }
     out += `<text x="${cxCell}" y="${y + 40}" text-anchor="middle" font-size="27" font-weight="800" fill="${C.ink}" style="font-variant-numeric:tabular-nums">${esc(fmt(s.value))}</text>`;
-    // icon + label centered as a pair: icon sits left of the label text
-    const labelLen = String(s.label).length;
-    const approxW = labelLen * 13; // CJK-ish estimate, good enough to center
+    const approxW = String(s.label).length * 13;
     const pairLeft = cxCell - (approxW + 20) / 2;
     out += svgIcon(STAT_ICONS[i] ?? 'zap', pairLeft, y + 52, 14, C.muted, 2.4);
     out += `<text x="${pairLeft + 20}" y="${y + 63}" font-size="13" fill="${C.muted}">${esc(s.label)}</text>`;
@@ -104,89 +121,125 @@ function statBand(stats, x, y, w, h) {
   return out;
 }
 
-/** Corner accents: short gold ticks that read as a game-card frame. */
-function cornerTicks(inset, len) {
+/** Ornate gold corner brackets on all four corners. */
+function corners(inset, len) {
   const a = inset;
   const b = W - inset;
   const c = H - inset;
-  const s = `stroke="${C.goldFrame}" stroke-width="2" stroke-linecap="round"`;
-  return `
-    <path d="M${a} ${a + len}V${a}h${len}" fill="none" ${s}/>
-    <path d="M${b - len} ${a}h${len}v${len}" fill="none" ${s}/>
-    <path d="M${b} ${c - len}v${len}h${-len}" fill="none" ${s}/>
-    <path d="M${a + len} ${c}h${-len}v${-len}" fill="none" ${s}/>`;
+  const s = `fill="none" stroke="url(#gold-grad)" stroke-width="3" stroke-linecap="round"`;
+  return [
+    `<path d="M${a} ${a + len}V${a}h${len}" ${s}/>`,
+    `<path d="M${b - len} ${a}h${len}v${len}" ${s}/>`,
+    `<path d="M${b} ${c - len}v${len}h${-len}" ${s}/>`,
+    `<path d="M${a + len} ${c}h${-len}v${-len}" ${s}/>`,
+  ].join('');
 }
 
 /**
- * Render the share card SVG.
+ * Render the holo card SVG.
  * data = { score, title, stats, lang, t, generatedAt }
  */
 export function renderCardSvg(data) {
   const { score, title, stats, lang, t, generatedAt } = data;
+  const rarity = score.rarity;
   const titleText = lang === 'ja' ? title.ja : title.en;
   const titleSub = lang === 'ja' ? title.en : '';
+  const holoOpacity = (0.1 + 0.28 * rarity.holo).toFixed(3);
 
-  const cx = 858;
-  const cy = 300;
-  const R = 168;
+  const cx = 862;
+  const cy = 306;
+  const R = 165;
 
-  return `<svg id="card-svg" xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Claude Code mastery card">
+  return `<svg id="card-svg" xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="Claude Code mastery holo card">
   <defs>
-    <radialGradient id="bg-glow" cx="0.72" cy="0.28" r="1.1">
-      <stop offset="0" stop-color="#1b2745"/>
-      <stop offset="0.45" stop-color="#121a30"/>
-      <stop offset="1" stop-color="#0b101e"/>
+    <radialGradient id="bg-glow" cx="0.7" cy="0.26" r="1.15">
+      <stop offset="0" stop-color="#1d2a4d"/>
+      <stop offset="0.45" stop-color="#121b34"/>
+      <stop offset="1" stop-color="#080c18"/>
     </radialGradient>
+    <linearGradient id="gold-grad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7a5a14"/>
+      <stop offset="0.28" stop-color="#f4d27a"/>
+      <stop offset="0.52" stop-color="#fff6cc"/>
+      <stop offset="0.72" stop-color="#d4af37"/>
+      <stop offset="1" stop-color="#8a6518"/>
+    </linearGradient>
+    <linearGradient id="holo" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff4d6d"/>
+      <stop offset="0.18" stop-color="#ffa63d"/>
+      <stop offset="0.36" stop-color="#ffe34d"/>
+      <stop offset="0.54" stop-color="#4dffa3"/>
+      <stop offset="0.72" stop-color="#43d9ff"/>
+      <stop offset="0.86" stop-color="#6b7bff"/>
+      <stop offset="1" stop-color="#c86bff"/>
+    </linearGradient>
     <linearGradient id="radar-fill" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#4a99f0" stop-opacity="0.42"/>
-      <stop offset="1" stop-color="#4a99f0" stop-opacity="0.08"/>
+      <stop offset="0" stop-color="#57b0ff" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#57b0ff" stop-opacity="0.07"/>
     </linearGradient>
     <linearGradient id="lv-fill" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#ffffff"/>
-      <stop offset="1" stop-color="#b9c6e2"/>
+      <stop offset="1" stop-color="#bcc9e6"/>
     </linearGradient>
     <linearGradient id="hairline" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="rgba(255,255,255,0.14)"/>
-      <stop offset="1" stop-color="rgba(255,255,255,0)"/>
+      <stop offset="0" stop-color="rgba(244,210,122,0.55)"/>
+      <stop offset="1" stop-color="rgba(244,210,122,0)"/>
     </linearGradient>
-    <filter id="radar-glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#3987e5" flood-opacity="0.55"/>
+    <filter id="glow-blue" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#3987e5" flood-opacity="0.6"/>
+    </filter>
+    <filter id="glow-gold" x="-60%" y="-60%" width="220%" height="220%">
+      <feDropShadow dx="0" dy="0" stdDeviation="7" flood-color="#f4d27a" flood-opacity="0.55"/>
     </filter>
     <filter id="lv-glow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="0" stdDeviation="14" flood-color="#8fb7ff" flood-opacity="0.22"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="14" flood-color="#9fc0ff" flood-opacity="0.28"/>
     </filter>
   </defs>
+
+  <!-- base + holo foil -->
   <rect width="${W}" height="${H}" fill="url(#bg-glow)"/>
-  <rect x="16" y="16" width="${W - 32}" height="${H - 32}" rx="18" fill="none" stroke="${C.frame}" stroke-width="1"/>
-  ${cornerTicks(28, 26)}
+  <g opacity="${holoOpacity}">
+    <rect width="${W}" height="${H}" fill="url(#holo)" transform="skewX(-18)" style="mix-blend-mode:screen"/>
+    <rect width="${W}" height="${H}" fill="url(#holo)" transform="translate(240 0) skewX(22)" style="mix-blend-mode:screen"/>
+  </g>
+  <rect width="${W}" height="${H}" fill="#0b1226" opacity="0.28"/>
+
+  <!-- gold frame -->
+  <rect x="9" y="9" width="${W - 18}" height="${H - 18}" rx="20" fill="none" stroke="url(#gold-grad)" stroke-width="3"/>
+  <rect x="18" y="18" width="${W - 36}" height="${H - 36}" rx="14" fill="none" stroke="rgba(244,210,122,0.22)" stroke-width="1"/>
+  ${corners(30, 30)}
+
   <g font-family="${FONT}">
-    <!-- header badge (no full-width rule) -->
-    ${svgIcon('swords', 64, 52, 20, C.goldDim)}
-    <text x="96" y="68" font-size="19" font-weight="700" letter-spacing="4.5" fill="${C.goldDim}">${esc(t('cardTitle'))}</text>
-    <text x="${W - 64}" y="68" text-anchor="end" font-size="14" letter-spacing="1" fill="${C.muted}" style="font-variant-numeric:tabular-nums">${esc(generatedAt)}</text>
+    <!-- header -->
+    ${svgIcon('swords', 66, 50, 20, C.gold)}
+    <text x="98" y="66" font-size="19" font-weight="700" letter-spacing="4.5" fill="${C.gold}">${esc(t('cardTitle'))}</text>
+    <text x="${W - 66}" y="66" text-anchor="end" font-size="14" letter-spacing="1" fill="${C.muted}" style="font-variant-numeric:tabular-nums">${esc(generatedAt)}</text>
 
-    <!-- left column -->
-    <text x="82" y="188" font-size="24" font-weight="700" letter-spacing="3" fill="${C.gold}">${esc(t('level'))}.</text>
-    <text x="76" y="352" font-size="168" font-weight="900" fill="url(#lv-fill)" filter="url(#lv-glow)" style="font-variant-numeric:tabular-nums">${score.level}</text>
-    <line x1="80" y1="386" x2="480" y2="386" stroke="url(#hairline)" stroke-width="1"/>
-    <text x="80" y="432" font-size="42" font-weight="800" fill="${C.gold}">${esc(titleText)}</text>
-    ${titleSub ? `<text x="80" y="463" font-size="20" font-weight="600" fill="${C.goldDim}">${esc(titleSub)}</text>` : ''}
+    <!-- rarity plate -->
+    ${rarityPlate(rarity, lang, 72, 108)}
 
-    <!-- estimated standard score pill -->
-    <rect x="80" y="484" width="292" height="44" rx="22" fill="rgba(255,255,255,0.05)" stroke="${C.frame}"/>
-    ${svgIcon('gauge', 100, 496, 19, C.inkSoft)}
-    <text x="127" y="512" font-size="19" font-weight="600" fill="${C.inkSoft}">${esc(t('deviation'))}</text>
-    <text x="348" y="514" font-size="25" font-weight="800" fill="${C.ink}" text-anchor="end" style="font-variant-numeric:tabular-nums">${score.deviation}</text>
+    <!-- level -->
+    <text x="76" y="212" font-size="23" font-weight="700" letter-spacing="3" fill="${C.gold}">${esc(t('level'))}.</text>
+    <text x="70" y="358" font-size="158" font-weight="900" fill="url(#lv-fill)" filter="url(#lv-glow)" style="font-variant-numeric:tabular-nums">${score.level}</text>
+    <line x1="80" y1="392" x2="490" y2="392" stroke="url(#hairline)" stroke-width="1.5"/>
+    <text x="80" y="437" font-size="41" font-weight="800" fill="${C.gold}">${esc(titleText)}</text>
+    ${titleSub ? `<text x="80" y="467" font-size="20" font-weight="600" fill="rgba(244,210,122,0.8)">${esc(titleSub)}</text>` : ''}
 
-    <!-- radar zone (owns x 560..1160, y 90..530) -->
+    <!-- deviation pill -->
+    <rect x="80" y="486" width="292" height="42" rx="21" fill="rgba(6,10,22,0.5)" stroke="rgba(244,210,122,0.28)"/>
+    ${svgIcon('gauge', 100, 497, 19, C.inkSoft)}
+    <text x="127" y="513" font-size="18" font-weight="600" fill="${C.inkSoft}">${esc(t('deviation'))}</text>
+    <text x="348" y="515" font-size="24" font-weight="800" fill="${C.ink}" text-anchor="end" style="font-variant-numeric:tabular-nums">${score.deviation}</text>
+
+    <!-- radar -->
     ${radar(score.axes, lang, cx, cy, R)}
 
     <!-- stat band -->
-    ${statBand(stats, 64, 544, W - 128, 80)}
+    ${statBand(stats, 66, 546, W - 132, 80)}
 
-    <!-- footer (≥32px clear of the card edge for X-preview crops) -->
-    <text x="64" y="641" font-size="13" fill="${C.muted}">${esc(t('estimated'))}</text>
-    <text x="${W - 64}" y="641" font-size="15" font-weight="700" text-anchor="end" fill="${C.goldDim}">npx cc-mastery</text>
+    <!-- footer -->
+    <text x="66" y="642" font-size="13" fill="${C.muted}">${esc(t('estimated'))}</text>
+    <text x="${W - 66}" y="642" font-size="15" font-weight="700" text-anchor="end" fill="${C.gold}">npx cc-mastery</text>
   </g>
 </svg>`;
 }

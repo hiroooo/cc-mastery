@@ -3,6 +3,7 @@
  * the dashboard breakdown view is generated from the same table, so tuning
  * happens in exactly one place.
  */
+import { resolveRarity } from './rarity.js';
 
 /**
  * Saturation curve (Michaelis-Menten): 0 at x=0, 50 at x=h, approaches 100.
@@ -16,6 +17,10 @@ export function sat(x, h) {
 // Assumed score distribution for the *estimated* standard score (偏差値).
 // v0.2 will replace this with a real opt-in distribution.
 export const BASELINE = { mean: 35, sd: 15 };
+
+// Level curve exponent: Lv = round(99 · (S/100)^GAMMA). γ<1 lifts the low end
+// so beginners aren't stuck at single digits.
+export const LEVEL_GAMMA = 0.9;
 
 export const AXES = [
   {
@@ -121,8 +126,9 @@ export function computeScores(raw) {
   });
 
   const total = axes.reduce((s, a) => s + a.score, 0) / axes.length;
-  const level = Math.max(1, Math.round(99 * (total / 100) ** 0.9));
+  const level = Math.max(1, Math.round(99 * (total / 100) ** LEVEL_GAMMA));
   const deviation = Math.round(50 + (10 * (total - BASELINE.mean)) / BASELINE.sd);
+  const rarity = resolveRarity(level);
 
-  return { axes, total: Math.round(total * 10) / 10, level, deviation };
+  return { axes, total: Math.round(total * 10) / 10, level, deviation, rarity };
 }

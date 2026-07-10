@@ -24,9 +24,41 @@ That's it. It scans your Claude Code config and session transcripts locally, wri
 | **PDCA** | Memory notes (feedback / reference), plan files, settings backup generations |
 | **Volume** | Active days, sessions, output tokens, projects |
 
-Every metric uses a saturation curve `100·x/(x+h)` — beginners don't flatline at 0, and power users never quite hit 100. The overall level (1–99) and an **estimated** standard score are derived from the axis average. ("Estimated" because v0.1 compares against an assumed distribution, not real user data — see Roadmap.)
+Titles are decided by your dominant axis: **The Orchestrator**, **The Tinkerer**, **The Automaton**, **The Kaizen Sage**, **The Grinder** … or **The Ascended** if you're 70+ across the board. Your level also sets a trading-card **rarity** (N → UC → R → SR → SSR), which only controls how flashy the card looks — stars and foil intensity — never the score.
 
-Titles are decided by your dominant axis: **The Orchestrator**, **The Tinkerer**, **The Automaton**, **The Kaizen Sage**, **The Grinder** … or **The Ascended** if you're 70+ across the board.
+## How scoring works
+
+Everything is computed from local measured values — **no randomness, no external data**. The same environment always produces the same score. The report includes a "How scoring works" panel with these formulas; here they are for reference:
+
+1. **Normalize each metric to 0–100** with a saturation curve:
+
+   ```
+   points = 100 · x / (x + h)
+   ```
+
+   `x` is the measured value; `h` is that metric's *half-point* (the value worth 50). At `x = 0` → 0, at `x = h` → 50, and it approaches but never reaches 100. So a beginner with 3 skills isn't stuck at 0, and a power user with 80 skills doesn't max out. Each metric's `h` is shown in the dashboard's per-axis breakdown.
+
+2. **Axis score = weighted sum** of its metrics (weights sum to 1.0).
+
+3. **Overall level (1–99)** from the axis mean `S`:
+
+   ```
+   Lv = round( 99 · (S / 100) ^ 0.9 )
+   ```
+
+   The 0.9 exponent lifts the low end. Lv 99 is effectively unreachable.
+
+4. **Estimated standard score** against an assumed distribution (mean 35, sd 15):
+
+   ```
+   dev = 50 + 10 · (S − 35) / 15
+   ```
+
+   *Estimated* because v0.1 has no real population to compare against — v0.2 will add opt-in real percentiles (see Roadmap).
+
+5. **Rarity** from level: SSR (Lv 75–99, ★★★★★) · SR (55–74) · R (35–54) · UC (18–34) · N (1–17).
+
+The full metric-by-metric table (`h` values and weights for all 5 axes) lives in [`src/scorer.js`](src/scorer.js) as one declarative table — tune it there and the dashboard breakdown updates automatically.
 
 ## What it reads / what it never does
 
