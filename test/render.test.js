@@ -58,8 +58,10 @@ test('renderCardSvg produces a self-contained, canvas-exportable SVG', () => {
   assert.ok(svg.includes('xmlns="http://www.w3.org/2000/svg"'));
   assert.ok(/width="1200"/.test(svg));
   assert.ok(/height="675"/.test(svg));
-  assert.ok(!svg.includes('http://') || !svg.includes('<image'), 'no external images');
-  assert.ok(!svg.includes('@font-face'), 'no external fonts');
+  assert.ok(!svg.includes('<image'), 'no external images');
+  // A data-URI @font-face is self-contained; only reject network references.
+  assert.ok(!/url\(https?:/.test(svg), 'no external url() references');
+  assert.ok(!/src\s*=\s*"https?:/.test(svg), 'no external src references');
   assert.ok(svg.includes('<polygon'), 'radar polygon present');
 });
 

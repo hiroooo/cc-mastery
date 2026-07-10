@@ -58,6 +58,10 @@ Everything is computed from local measured values — **no randomness, no extern
 
 5. **Rarity** from level: SSR (Lv 75–99, ★★★★★) · SR (55–74) · R (35–54) · UC (18–34) · N (1–17).
 
+Rarity themes the whole card — metallic frame, accent ink, star count, and foil intensity all shift by tier:
+
+![rarity tiers](docs/rarity-tiers.png)
+
 The full metric-by-metric table (`h` values and weights for all 5 axes) lives in [`src/scorer.js`](src/scorer.js) as one declarative table — tune it there and the dashboard breakdown updates automatically.
 
 ## What it reads / what it never does
@@ -75,6 +79,18 @@ The full metric-by-metric table (`h` values and weights for all 5 axes) lives in
 - ❌ No telemetry
 
 The lower half of the HTML report is a local-only dashboard that *does* show skill/project/model names for your own analysis — it sits behind a "don't screenshot this part" banner.
+
+## Is it safe? (exactly what it touches)
+
+cc-mastery is **read-only against your Claude Code data** and has **zero dependencies** — the only code to audit is the few hundred lines of plain JS in [`src/`](src/). Audited surface:
+
+- **Reads** — only `~/.claude` (config inventory + session `*.jsonl`), via `readdir` / `readFile` / `stat`. It never modifies, deletes, or writes **anything** under `~/.claude`.
+- **Writes** — exactly two things, both its own output: the report HTML you asked for (`--output`, default `./cc-mastery-report.html`) and a scan cache at `~/.cache/cc-mastery/`. Nothing else on disk is touched; the only file it ever deletes is its own cache temp file.
+- **Runs** — one child process: opening the finished report in your browser (`open` / `xdg-open` / `start`). Disable with `--no-open`.
+- **Network** — none. There is no `fetch`, `http`, or socket call anywhere in the source.
+- **No** `eval`, no dynamic code execution, no telemetry.
+
+In short: it reads your data, writes a report + a cache, and (optionally) opens a browser. That's the whole footprint.
 
 ## Options
 

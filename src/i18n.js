@@ -67,6 +67,10 @@ const DICT = {
     ja: 'すべての解析はローカル完結 — 何も送信していません',
     en: 'All analysis is local — nothing ever leaves your machine',
   },
+  shareNote: {
+    ja: '共有する前に、カードに見せたくない情報が写っていないか自分で確認を（自己責任）。',
+    en: 'Before sharing, check the card for anything you’d rather not post — you share at your own risk.',
+  },
 };
 
 export function makeT(lang) {

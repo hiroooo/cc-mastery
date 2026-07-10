@@ -1,6 +1,7 @@
 import { renderCardSvg } from './card-svg.js';
 import { renderDashboard } from './dashboard.js';
 import { icon } from './icons.js';
+import { FONT_FACE_CSS, NUM_FONT_FAMILY } from './font.js';
 
 function esc(s) {
   return String(s).replace(/[&<>"']/g, (ch) => `&#${ch.charCodeAt(0)};`);
@@ -72,6 +73,7 @@ button.save-png {
 button.save-png:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(57,135,229,0.45); }
 button.save-png svg { margin: 0; }
 .local-note { color: var(--muted); font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.share-note { margin-top: 4px; font-size: 12px; opacity: 0.85; }
 
 /* ---- dashboard chrome ---- */
 .privacy-banner {
@@ -131,7 +133,7 @@ h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg
   border: 1px solid var(--hairline); border-radius: 14px; padding: var(--sp-6);
 }
 .axis-table h3 { font-size: 15px; display: flex; justify-content: space-between; align-items: baseline; }
-.axis-score { color: var(--series-bright); font-weight: 800; font-size: 22px; }
+.axis-score { color: var(--series-bright); font-weight: 800; font-size: 22px; font-family: ${NUM_FONT_FAMILY}; }
 .axis-bar { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.07); margin: 10px 0 14px; overflow: hidden; }
 .axis-bar span { display: block; height: 100%; border-radius: 2px; background: linear-gradient(90deg, var(--series), var(--series-bright)); }
 table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
@@ -185,7 +187,9 @@ footer a { color: var(--series-bright); }
 `;
 
 const PNG_SCRIPT = `
-document.getElementById('save-png').addEventListener('click', () => {
+document.getElementById('save-png').addEventListener('click', async () => {
+  // Wait for the embedded Orbitron face so numerals rasterize correctly.
+  if (document.fonts && document.fonts.ready) { try { await document.fonts.ready; } catch (e) {} }
   const svg = document.getElementById('card-svg');
   const xml = new XMLSerializer().serializeToString(svg);
   const url = URL.createObjectURL(new Blob([xml], { type: 'image/svg+xml;charset=utf-8' }));
@@ -220,7 +224,7 @@ export function renderHtml(data) {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>cc-mastery</title>
-<style>${CSS}</style>
+<style>${FONT_FACE_CSS}${CSS}</style>
 </head>
 <body>
 <div class="wrap">
@@ -230,6 +234,7 @@ export function renderHtml(data) {
       <button class="save-png" id="save-png">${icon('download', 16)}${esc(t('savePng'))}</button>
     </div>
     <div class="local-note">${icon('lock', 13)}${esc(t('localOnly'))}</div>
+    <div class="local-note share-note">${esc(t('shareNote'))}</div>
   </div>
   ${dashboard}
   <footer>${esc(t('generatedBy'))} <a href="https://github.com/hiroooo/cc-mastery">cc-mastery</a> v${esc(data.version)}</footer>

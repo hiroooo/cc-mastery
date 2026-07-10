@@ -197,11 +197,11 @@ export function renderDashboard(data) {
   const { score, sessions, lang, t } = data;
   return `
   <div class="privacy-banner">${icon('shield', 15)}<span>${esc(t('privacyBanner'))}</span></div>
-  ${scoringMethod(lang, t)}
   ${breakdownTables(score, lang, t)}
   ${heatmap(sessions.dayCounts ?? {}, lang, t)}
   ${barList(top(sessions.toolUse ?? {}, 15), t('toolsHeading'), 'wrench')}
   ${barList(top(sessions.attributionSkills ?? {}, 15), t('skillsHeading'), 'zap')}
   ${barList(top(sessions.models ?? {}, 8), t('modelsHeading'), 'cpu')}
+  ${scoringMethod(lang, t)}
   `;
 }
