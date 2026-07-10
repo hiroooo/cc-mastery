@@ -1,10 +1,14 @@
 #!/usr/bin/env node
 import { run } from '../src/cli.js';
 
+// Set exitCode instead of calling process.exit() so buffered stdout (e.g. the
+// --json payload written to a pipe) is fully flushed before the process ends.
 run().then(
-  (code) => process.exit(code),
+  (code) => {
+    process.exitCode = code;
+  },
   (err) => {
     console.error(`cc-mastery: ${err?.stack ?? err}`);
-    process.exit(1);
+    process.exitCode = 1;
   }
 );
