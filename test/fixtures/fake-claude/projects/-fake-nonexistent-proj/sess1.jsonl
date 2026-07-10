@@ -1,0 +1,7 @@
+{"type":"user","timestamp":"2026-07-01T10:00:00.000Z","sessionId":"s1","cwd":"/fake","message":{"role":"user","content":"hello"}}
+{"type":"assistant","timestamp":"2026-07-01T10:00:05.000Z","sessionId":"s1","message":{"role":"assistant","model":"claude-fable-5","usage":{"input_tokens":100,"output_tokens":50,"cache_read_input_tokens":1000,"cache_creation_input_tokens":10,"iterations":[{"input_tokens":100,"output_tokens":50}]},"content":[{"type":"text","text":"hi"}]}}
+{"type":"assistant","timestamp":"2026-07-02T09:30:00.000Z","sessionId":"s1","message":{"role":"assistant","model":"claude-fable-5","usage":{"input_tokens":20,"output_tokens":10,"cache_read_input_tokens":0},"content":[{"type":"tool_use","id":"t1","name":"Agent","input":{"prompt":"do it"}}]}}
+{"type":"user","timestamp":"2026-07-02T11:00:00.000Z","sessionId":"s1","isSidechain":true,"message":{"role":"user","content":"sidechain msg"}}
+{"type":"system","subtype":"post_hook","timestamp":"2026-07-02T12:00:00.000Z","hookCount":3,"hookErrors":0}
+{"type":"user","timestamp":"2026-07-03T09:00:00.000Z","sessionId":"s1","attributionSkill":"my-secret-skill","message":{"role":"user","content":"skill line"}}
+{broken json line that must be skipped

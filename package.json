@@ -1,0 +1,34 @@
+{
+  "name": "cc-mastery",
+  "version": "0.1.0",
+  "description": "How deeply have you mastered Claude Code? Scan ~/.claude locally and render an RPG-style mastery card (radar chart, level, title). Zero dependencies, nothing leaves your machine.",
+  "type": "module",
+  "bin": {
+    "cc-mastery": "bin/cc-mastery.js"
+  },
+  "engines": {
+    "node": ">=18.17"
+  },
+  "files": [
+    "bin",
+    "src"
+  ],
+  "scripts": {
+    "test": "node --test 'test/*.test.js'"
+  },
+  "keywords": [
+    "claude-code",
+    "claude",
+    "cli",
+    "visualization",
+    "analytics",
+    "status-card",
+    "mastery"
+  ],
+  "author": "hiroooo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hiroooo/cc-mastery.git"
+  }
+}

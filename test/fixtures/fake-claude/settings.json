@@ -1,0 +1,24 @@
+{
+  "model": "opus",
+  "permissions": {
+    "allow": ["Bash(ls:*)", "Bash(cat:*)", "Read(//tmp/**)", "WebFetch(domain:example.com)", "Bash(git status)"],
+    "ask": ["Bash(rm:*)"]
+  },
+  "hooks": {
+    "PreToolUse": [
+      { "matcher": "Bash", "hooks": [{ "type": "command", "command": "./hooks/h1.sh" }] }
+    ],
+    "SessionStart": [
+      { "hooks": [{ "type": "command", "command": "echo start" }] },
+      { "hooks": [{ "type": "command", "command": "echo start2" }] }
+    ]
+  },
+  "enabledPlugins": {
+    "some-plugin@marketplace": true,
+    "disabled-plugin@marketplace": false
+  },
+  "mcpServers": {
+    "fake-server": { "command": "echo" }
+  },
+  "statusLine": { "type": "command", "command": "echo status" }
+}

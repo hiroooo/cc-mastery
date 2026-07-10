@@ -1,0 +1,2 @@
+{"type":"user","timestamp":"2026-07-01T15:00:00.000Z","sessionId":"s2","message":{"role":"user","content":"second session"}}
+{"type":"assistant","timestamp":"2026-07-01T15:00:04.000Z","sessionId":"s2","message":{"role":"assistant","model":"claude-sonnet-5","usage":{"input_tokens":5,"output_tokens":5},"content":[{"type":"tool_use","id":"t2","name":"Bash","input":{"command":"ls"}}]}}
