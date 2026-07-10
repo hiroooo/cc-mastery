@@ -216,11 +216,13 @@ export function renderCardSvg(data) {
     <text x="80" y="439" font-size="41" font-weight="800" fill="${accent}">${esc(titleText)}</text>
     ${titleSub ? `<text x="80" y="469" font-size="20" font-weight="600" fill="${accentSoft}">${esc(titleSub)}</text>` : ''}
 
-    <!-- deviation pill -->
-    <rect x="80" y="488" width="292" height="42" rx="21" fill="rgba(6,10,22,0.5)" stroke="${accentSoft}" stroke-opacity="0.3"/>
-    ${svgIcon('gauge', 100, 499, 19, INK_SOFT)}
-    <text x="127" y="515" font-size="18" font-weight="600" fill="${INK_SOFT}">${esc(t('deviation'))}</text>
-    <text x="348" y="517" font-size="24" font-weight="800" fill="${INK}" text-anchor="end" font-family="${NUM}">${score.deviation}</text>
+    <!-- deviation pill (hover shows the formula in-browser; not baked into PNG) -->
+    <g><title>${esc(t('deviationTip'))}</title>
+      <rect x="80" y="488" width="292" height="42" rx="21" fill="rgba(6,10,22,0.5)" stroke="${accentSoft}" stroke-opacity="0.3"/>
+      ${svgIcon('gauge', 100, 499, 19, INK_SOFT)}
+      <text x="127" y="515" font-size="18" font-weight="600" fill="${INK_SOFT}">${esc(t('deviation'))}</text>
+      <text x="348" y="517" font-size="24" font-weight="800" fill="${INK}" text-anchor="end" font-family="${NUM}">${score.deviation}</text>
+    </g>
 
     <!-- radar -->
     ${radar(score.axes, lang, cx, cy, R)}

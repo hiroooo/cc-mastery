@@ -3,6 +3,10 @@ const DICT = {
   level: { ja: 'Lv', en: 'Lv' },
   title: { ja: '称号', en: 'Title' },
   deviation: { ja: '推定偏差値', en: 'Est. std. score' },
+  deviationTip: {
+    ja: '想定分布（平均35・標準偏差15）に対する推定偏差値。式: 50 + 10×(S−35)/15、S=5軸の平均。実分布ではなく想定値です（詳細はレポート下部「採点方式」）。',
+    en: 'Estimated standard score vs an assumed distribution (mean 35, sd 15). Formula: 50 + 10×(S−35)/15, S = mean of the 5 axes. An estimate, not a real population (see "How scoring works" below).',
+  },
   estimated: { ja: '※想定分布による推定値', en: 'estimated against an assumed distribution' },
   statSkills: { ja: 'スキル', en: 'Skills' },
   statAgents: { ja: 'エージェント', en: 'Agents' },
