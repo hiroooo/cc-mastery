@@ -2,7 +2,6 @@
  * Detail dashboard (local viewing only — this section DOES show skill /
  * project / model names, behind an explicit "don't screenshot this" banner).
  */
-
 import { icon } from './icons.js';
 
 function esc(s) {
@@ -14,10 +13,11 @@ function fmt(n) {
 }
 
 // sequential blue ramp on the dark surface (low → high)
-const HEAT_STEPS = ['#184f95', '#256abf', '#3987e5', '#86b6ef'];
+const HEAT_STEPS = ['#1c4f8f', '#2a70c4', '#4a99f0', '#8fc0f7'];
 
-function heatmap(dayCounts, t) {
-  const DAY_MS = 24 * 60 * 60 * 1000;
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+function heatmap(dayCounts, lang, t) {
   const today = new Date();
   today.setUTCHours(0, 0, 0, 0);
   // Adaptive range: transcripts are pruned after ~30 days by default, so a
@@ -34,7 +34,17 @@ function heatmap(dayCounts, t) {
 
   const max = Math.max(1, ...Object.values(dayCounts));
   const cols = [];
+  const monthLabels = [];
+  let lastMonth = -1;
+  let colIndex = 0;
   for (let ws = new Date(start); ws <= today; ws = new Date(ws.getTime() + 7 * DAY_MS)) {
+    const m = ws.getUTCMonth();
+    if (m !== lastMonth) {
+      monthLabels.push(
+        `<span style="grid-column:${colIndex + 1}">${lang === 'ja' ? `${m + 1}月` : ws.toLocaleString('en', { month: 'short', timeZone: 'UTC' })}</span>`
+      );
+      lastMonth = m;
+    }
     const cells = [];
     for (let d = 0; d < 7; d += 1) {
       const day = new Date(ws.getTime() + d * DAY_MS);
@@ -54,10 +64,22 @@ function heatmap(dayCounts, t) {
       );
     }
     cols.push(`<div class="hm-col">${cells.join('')}</div>`);
+    colIndex += 1;
   }
+  const dow = lang === 'ja' ? ['月', '水', '金'] : ['Mon', 'Wed', 'Fri'];
+  const legendCells = HEAT_STEPS.map((c) => `<i style="background:${c}"></i>`).join('');
   return `<section>
-    <h2>${icon('activity')} ${esc(t('heatmapHeading'))}</h2>
-    <div class="hm-scroll"><div class="hm-grid">${cols.join('')}</div></div>
+    <h2>${icon('activity', 15)}<span>${esc(t('heatmapHeading'))}</span></h2>
+    <div class="panel">
+      <div class="hm-wrap">
+        <div class="hm-dow"><span>${dow[0]}</span><span>${dow[1]}</span><span>${dow[2]}</span></div>
+        <div class="hm-scroll">
+          <div class="hm-months" style="grid-template-columns: repeat(${colIndex}, 18px)">${monthLabels.join('')}</div>
+          <div class="hm-grid">${cols.join('')}</div>
+        </div>
+      </div>
+      <div class="hm-legend"><span>${lang === 'ja' ? '少' : 'less'}</span><i style="background:var(--cell-empty)"></i>${legendCells}<span>${lang === 'ja' ? '多' : 'more'}</span></div>
+    </div>
   </section>`;
 }
 
@@ -69,14 +91,16 @@ function breakdownTables(score, lang, t) {
           (m) => `<tr>
         <td>${esc(lang === 'ja' ? m.ja : m.en)}</td>
         <td class="num">${fmt(m.x)}</td>
-        <td class="num">${m.h == null ? '—' : fmt(m.h)}</td>
-        <td class="num">${m.w.toFixed(2)}</td>
-        <td class="num strong">${m.points}</td>
+        <td class="num dim">${m.h == null ? '—' : fmt(m.h)}</td>
+        <td class="num dim">${m.w.toFixed(2)}</td>
+        <td class="num strong"><span class="mini-track"><span style="width:${Math.min(100, m.points)}%"></span></span>${m.points}</td>
       </tr>`
         )
         .join('');
+      const s = Math.round(axis.score);
       return `<div class="axis-table">
-      <h3>${esc(lang === 'ja' ? axis.ja : axis.en)} <span class="axis-score">${Math.round(axis.score)}</span></h3>
+      <h3><span>${esc(lang === 'ja' ? axis.ja : axis.en)}</span><span class="axis-score">${s}</span></h3>
+      <div class="axis-bar"><span style="width:${s}%"></span></div>
       <table>
         <thead><tr><th>${esc(t('colMetric'))}</th><th class="num">${esc(t('colValue'))}</th><th class="num">${esc(t('colHalf'))}</th><th class="num">${esc(t('colWeight'))}</th><th class="num">${esc(t('colPoints'))}</th></tr></thead>
         <tbody>${rows}</tbody>
@@ -84,7 +108,7 @@ function breakdownTables(score, lang, t) {
     </div>`;
     })
     .join('');
-  return `<section><h2>${icon('table')} ${esc(t('breakdownHeading'))}</h2><div class="axis-grid">${sections}</div></section>`;
+  return `<section><h2>${icon('table', 15)}<span>${esc(t('breakdownHeading'))}</span></h2><div class="axis-grid">${sections}</div></section>`;
 }
 
 function barList(entries, heading, iconName) {
@@ -92,14 +116,15 @@ function barList(entries, heading, iconName) {
   const max = Math.max(...entries.map(([, v]) => v));
   const rows = entries
     .map(
-      ([name, v]) => `<div class="bar-row">
+      ([name, v], i) => `<div class="bar-row">
+      <div class="bar-rank">${i + 1}</div>
       <div class="bar-label" title="${esc(name)}">${esc(name)}</div>
       <div class="bar-track"><div class="bar-fill" style="width:${((100 * v) / max).toFixed(1)}%"></div></div>
       <div class="bar-value">${fmt(v)}</div>
     </div>`
     )
     .join('');
-  return `<section><h2>${icon(iconName)} ${esc(heading)}</h2><div class="bars">${rows}</div></section>`;
+  return `<section><h2>${icon(iconName, 15)}<span>${esc(heading)}</span></h2><div class="panel">${rows}</div></section>`;
 }
 
 function top(obj, n) {
@@ -112,10 +137,9 @@ function top(obj, n) {
 export function renderDashboard(data) {
   const { score, sessions, lang, t } = data;
   return `
-  <div class="privacy-banner">${icon('shield', 16)}${esc(t('privacyBanner'))}</div>
-  <h1 class="dash-title">${esc(t('dashboardTitle'))}</h1>
+  <div class="privacy-banner">${icon('shield', 15)}<span>${esc(t('privacyBanner'))}</span></div>
   ${breakdownTables(score, lang, t)}
-  ${heatmap(sessions.dayCounts ?? {}, t)}
+  ${heatmap(sessions.dayCounts ?? {}, lang, t)}
   ${barList(top(sessions.toolUse ?? {}, 15), t('toolsHeading'), 'wrench')}
   ${barList(top(sessions.attributionSkills ?? {}, 15), t('skillsHeading'), 'zap')}
   ${barList(top(sessions.models ?? {}, 8), t('modelsHeading'), 'cpu')}

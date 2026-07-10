@@ -8,9 +8,9 @@ const PATHS = {
   // lightning bolt — skills
   zap: '<path d="M13 2 4.5 13.5H11L10 22l8.5-11.5H12L13 2z"/>',
   // robot head — agents
-  bot: '<rect x="5" y="8" width="14" height="11" rx="2"/><path d="M12 8V4M8 4h8"/><circle cx="9" cy="13" r="1" fill="currentColor" stroke="none"/><circle cx="15" cy="13" r="1" fill="currentColor" stroke="none"/>',
-  // fish hook — hooks
-  hook: '<path d="M12 3v11a4 4 0 0 0 8 0v-2l-3 2"/><circle cx="12" cy="3" r="1.5"/>',
+  bot: '<rect x="5" y="9" width="14" height="10" rx="2.5"/><path d="M12 9V5"/><circle cx="12" cy="4" r="1.4"/><circle cx="9.2" cy="14" r="1.2" fill="currentColor" stroke="none"/><circle cx="14.8" cy="14" r="1.2" fill="currentColor" stroke="none"/>',
+  // anchor — hooks (reads cleanly at 14px, unlike a fishhook)
+  hook: '<circle cx="12" cy="5.5" r="2.5"/><path d="M12 8v12M5 13H3a9 9 0 0 0 18 0h-2"/>',
   // terminal prompt — sessions
   terminal: '<path d="M5 7l5 5-5 5M12 17h7"/>',
   // calendar — active days
