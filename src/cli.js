@@ -114,6 +114,12 @@ export async function run(argv = process.argv.slice(2)) {
   ]);
   if (sessionScan.fileCount > 0) log('\n');
 
+  if (args.project && sessionScan.fileCount === 0) {
+    log(`⚠ No session transcripts matched --project "${args.project}". `);
+    log('The session axes (Volume, Agents, Automation) will read as empty.\n');
+    log('  Tip: --project matches a substring of the project dir name, e.g. "project-app".\n\n');
+  }
+
   const raw = { fs: fsMetrics, sessions: sessionScan.metrics };
   const score = computeScores(raw);
   const title = resolveTitle(score);

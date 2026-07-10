@@ -49,6 +49,13 @@ test('HTML output mode writes the report and prints a summary', async () => {
   }
 });
 
+test('--project with no match warns on stderr', async () => {
+  const { stderr } = await runCli([
+    '--claude-dir', FIXTURE, '--json', '--no-cache', '--project', 'no-such-project-xyz',
+  ]);
+  assert.match(stderr, /No session transcripts matched --project/);
+});
+
 test('--version and --help work', async () => {
   const v = await runCli(['--version']);
   assert.match(v.stdout.trim(), /^\d+\.\d+\.\d+$/);
