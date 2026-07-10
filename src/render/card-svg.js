@@ -88,16 +88,15 @@ function starRow(x, y, size, filled) {
   return out;
 }
 
-/** Rarity plate: [SSR] badge, star row beside it, tier name on its own line. */
-function rarityPlate(rarity, lang, accent, x, y) {
-  const name = lang === 'ja' ? rarity.ja : rarity.en;
+/** Rarity plate: [SSR] badge + star row. The badge + stars carry the tier,
+ *  so no redundant tier-name label. */
+function rarityPlate(rarity, x, y) {
   return `
     <g filter="url(#glow-accent)">
       <rect x="${x}" y="${y}" width="88" height="40" rx="9" fill="url(#frame-grad)"/>
     </g>
     <text x="${x + 44}" y="${y + 28}" text-anchor="middle" font-size="23" font-weight="900" fill="#15131f" letter-spacing="0.5" font-family="${NUM}">${esc(rarity.id)}</text>
-    ${starRow(x + 104, y + 8, 22, rarity.stars)}
-    <text x="${x + 2}" y="${y + 62}" font-size="14" font-weight="700" letter-spacing="4" fill="${accent}">${esc(name.toUpperCase())}</text>`;
+    ${starRow(x + 104, y + 9, 24, rarity.stars)}`;
 }
 
 function statBand(stats, accentSoft, x, y, w, h) {
@@ -208,7 +207,7 @@ export function renderCardSvg(data) {
     <text x="${W - 66}" y="66" text-anchor="end" font-size="14" letter-spacing="1" fill="${MUTED}" font-family="${NUM}">${esc(generatedAt)}</text>
 
     <!-- rarity plate -->
-    ${rarityPlate(rarity, lang, accent, 72, 104)}
+    ${rarityPlate(rarity, 72, 110)}
 
     <!-- level -->
     <text x="76" y="222" font-size="22" font-weight="700" letter-spacing="3" fill="${accent}">${esc(t('level'))}.</text>

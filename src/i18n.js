@@ -68,8 +68,8 @@ const DICT = {
     en: 'All analysis is local — nothing ever leaves your machine',
   },
   shareNote: {
-    ja: '共有する前に、カードに見せたくない情報が写っていないか自分で確認を（自己責任）。',
-    en: 'Before sharing, check the card for anything you’d rather not post — you share at your own risk.',
+    ja: 'PNG 保存して X などの投稿画面に添付を。共有前に見せたくない情報が写っていないか自分で確認（自己責任）。',
+    en: 'Save the PNG and attach it in your post. Before sharing, check the card for anything you’d rather not post — at your own risk.',
   },
 };
 

@@ -61,17 +61,20 @@ body {
   100% { background-position: 0% 50%; }
 }
 @media (prefers-reduced-motion: reduce) { .card-frame::before { animation: none; } }
-.card-actions { margin: var(--sp-6) 0 var(--sp-3); }
-button.save-png {
+.card-actions { margin: var(--sp-6) 0 var(--sp-3); display: flex; gap: 12px; justify-content: center; }
+.btn {
   display: inline-flex; align-items: center; gap: 8px;
-  background: linear-gradient(180deg, var(--series-bright), var(--series));
-  color: #fff; border: 0; border-radius: 10px;
-  padding: 12px 26px; font-size: 15px; font-weight: 700; cursor: pointer;
-  font-family: inherit; transition: transform .12s ease, box-shadow .12s ease;
-  box-shadow: 0 6px 20px rgba(57,135,229,0.35);
+  border: 0; border-radius: 10px; padding: 12px 26px;
+  font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
 }
-button.save-png:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(57,135,229,0.45); }
-button.save-png svg { margin: 0; }
+.btn svg { margin: 0; }
+.btn:hover { transform: translateY(-1px); }
+.btn-save {
+  background: linear-gradient(180deg, var(--series-bright), var(--series));
+  color: #fff; box-shadow: 0 6px 20px rgba(57,135,229,0.35);
+}
+.btn-save:hover { box-shadow: 0 10px 26px rgba(57,135,229,0.45); }
 .local-note { color: var(--muted); font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; }
 .share-note { margin-top: 4px; font-size: 12px; opacity: 0.85; }
 
@@ -231,7 +234,7 @@ export function renderHtml(data) {
   <div class="card-holder">
     <div class="card-frame">${card}</div>
     <div class="card-actions">
-      <button class="save-png" id="save-png">${icon('download', 16)}${esc(t('savePng'))}</button>
+      <button class="btn btn-save" id="save-png">${icon('download', 16)}${esc(t('savePng'))}</button>
     </div>
     <div class="local-note">${icon('lock', 13)}${esc(t('localOnly'))}</div>
     <div class="local-note share-note">${esc(t('shareNote'))}</div>
