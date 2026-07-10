@@ -11,7 +11,8 @@
   },
   "files": [
     "bin",
-    "src"
+    "src",
+    "fonts"
   ],
   "scripts": {
     "test": "node --test"
